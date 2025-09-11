@@ -1,0 +1,497 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head>   
+  <meta charset="UTF-8" />   
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />   
+  <title>Birthday Blast 🎉 | Countdown & Time Capsule</title>   
+
+  <meta name="description" content="Celebrate your birthday with Birthday Blast! 🎂 Countdown to your special day, unlock a digital time capsule, and enjoy glowing animations." />
+  <meta name="keywords" content="birthday countdown, birthday website, birthday celebration, digital time capsule, confetti animation" />
+  <meta name="author" content="Rainier P.S." />
+
+  <meta property="og:title" content="Birthday Blast 🎉 | Countdown & Time Capsule" />
+  <meta property="og:description" content="Countdown to your birthday, unlock a secret time capsule, and celebrate in style with confetti animations." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:image" content="https://yourdomain.com/preview.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Birthday Blast 🎉 | Countdown & Time Capsule" />
+  <meta name="twitter:description" content="Make your birthday unforgettable with countdowns, glowing animations, and a digital time capsule." />
+  <meta name="twitter:image" content="https://yourdomain.com/preview.png" />
+
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Birthday Blast Countdown",
+    "startDate": "2025-06-15T00:00",
+    "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "location": {
+      "@type": "VirtualLocation",
+      "url": "https://yourdomain.com/"
+    },
+    "image": "https://yourdomain.com/preview.png",
+    "description": "Celebrate your birthday with a countdown timer, confetti, glowing animations, and a password-protected time capsule.",
+    "organizer": {
+      "@type": "Organization",
+      "name": "Birthday Blast",
+      "url": "https://yourdomain.com/"
+    }
+  }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>   
+  <style>
+    .digit {
+      perspective: 1000px;
+      background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+      border: 2px solid #22c55e33;
+      box-shadow: 0 0 10px rgba(34,197,94,0.5), 0 0 20px rgba(34,197,94,0.25);
+      border-radius: 0.75rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .digit span {
+      display: inline-block;
+      transform-origin: center;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+    .digit.flip span {
+      transform: rotateX(360deg);
+      opacity: 0.95;
+    }
+    .digit-glow {
+      text-shadow: 0 0 4px #22c55e, 0 0 8px #16a34a, 0 0 12px #22c55e;
+    }
+
+    .greeting-glow {
+      text-shadow: 0 0 4px #22c55e, 0 0 8px #16a34a, 0 0 12px #22c55e;
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        transform: scale(1);
+        text-shadow: 0 0 4px #22c55e, 0 0 8px #16a34a, 0 0 12px #22c55e;
+      }
+      50% {
+        transform: scale(1.05);
+        text-shadow: 0 0 6px #22c55e, 0 0 12px #16a34a, 0 0 18px #22c55e;
+      }
+    }
+    .pulse {
+      animation: pulseGlow 3s ease-in-out infinite;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #terminalOverlay {
+      position: fixed;
+      inset: 0;
+      background: black;
+      color: #22c55e;
+      font-family: monospace;
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      z-index: 50;
+    }
+    #terminalOutput {
+      flex: 1;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-size: 0.9rem;
+    }
+    #terminalInput {
+      outline: none;
+      background: transparent;
+      border: none;
+      color: #22c55e;
+      font-family: monospace;
+      width: 100%;
+      font-size: 1rem;
+      padding: 6px 0;
+    }
+
+    #terminalBtn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 60;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #111;
+      border: 2px solid #22c55e;
+      color: #22c55e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 0 8px #22c55e66;
+      transition: all 0.2s ease-in-out;
+    }
+    #terminalBtn:hover {
+      background: #1a1a1a;
+      box-shadow: 0 0 12px #22c55eaa;
+    }
+
+    #greeting {
+      padding: 0 1rem;
+      word-wrap: break-word;
+      text-align: center;
+    }
+
+    @media (max-width: 1024px) {
+      #terminalOverlay {
+        padding: 16px;
+        font-size: 1rem;
+      }
+      #terminalOutput {
+        font-size: 1rem;
+        max-height: 65vh;
+      }
+    }
+    @media (max-width: 640px) {
+      .digit {
+        width: 16vw;
+        height: 20vw;
+      }
+      #countdown {
+        gap: 0.5rem;
+      }
+
+      #terminalOverlay {
+        font-size: 1.05rem;
+        padding: 12px;
+      }
+      #terminalInput {
+        font-size: 1.2rem;
+        padding: 10px 0;
+      }
+      #terminalOutput {
+        font-size: 0.95rem;
+        max-height: 60vh;
+      }
+
+      #terminalBtn {
+        width: 64px;
+        height: 64px;
+      }
+    }
+  </style>
+</head> 
+<body class="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white relative overflow-hidden">   
+  <canvas id="confetti"></canvas>   
+  <button id="terminalBtn">&lt;/&gt;</button>   
+  <div id="terminalOverlay" class="flex">     
+    <div id="terminalOutput"></div>     
+    <div>       
+      <span>&gt; </span><input id="terminalInput" autofocus />     
+    </div>   
+  </div>   
+  <h1 id="greeting" class="text-3xl sm:text-4xl md:text-5xl font-bold mb-8 text-center greeting-glow pulse"></h1>   
+  <div id="countdown" class="flex gap-8"></div>   
+  <script>
+  // Default settings
+  let settings = {
+    name: "Rainier",
+    birthMonth: 5, // June (0-indexed)
+    birthDay: 15
+  };
+  if (localStorage.getItem("countdownSettings")) {
+    settings = JSON.parse(localStorage.getItem("countdownSettings"));
+  }
+  let capsule = JSON.parse(localStorage.getItem("capsuleData") || "[]");
+  let capsulePassHash = localStorage.getItem("capsulePassHash") || null;
+
+  function getTimeParts() {
+    const now = new Date();
+    let nextBirthday = new Date(now.getFullYear(), settings.birthMonth, settings.birthDay);
+    if (nextBirthday < now) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+    const diff = nextBirthday - now;
+    return {
+      isBirthday: diff <= 0 && now.getDate() === settings.birthDay && now.getMonth() === settings.birthMonth,
+      days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((diff / (1000 * 60)) % 60),
+      seconds: Math.floor((diff / 1000) % 60),
+      nextBirthday
+    };
+  }
+
+  function createDigitCard(digit, key) {
+    return `
+      <div class="digit text-green-400 digit-glow font-mono text-6xl sm:text-7xl md:text-8xl font-bold px-5 py-8 rounded-lg flex justify-center items-center w-20 sm:w-24 md:w-28" data-key="${key}">
+        <span>${digit}</span>
+      </div>
+    `;
+  }
+
+  function formatUnit(num, label) {
+    const strDigits = String(num).padStart(2,"0").split("");
+    return `
+      <div class="flex flex-col items-center">
+        <div class="flex gap-2">
+          ${strDigits.map((d,i) => createDigitCard(d, label+"-"+i)).join("")}
+        </div>
+        <span class="mt-2 text-sm uppercase tracking-wider text-gray-300 font-bold"><strong>${label}</strong></span>
+      </div>
+    `;
+  }
+
+  let lastValues = {};
+  function renderCountdown() {
+    const { isBirthday, days, hours, minutes, seconds } = getTimeParts();
+    const greeting = document.getElementById("greeting");
+    if (isBirthday) {
+      greeting.textContent = `🎉 Happy Birthday ${settings.name}! 🎂`;
+      startConfetti();
+    } else {
+      greeting.textContent = `Hi ${settings.name}, your next birthday is in...`;
+    }
+    document.getElementById("countdown").innerHTML = `
+      ${formatUnit(days, "Days")}
+      ${formatUnit(hours, "Hours")}
+      ${formatUnit(minutes, "Minutes")}
+      ${formatUnit(seconds, "Seconds")}
+    `;
+    const values = { days, hours, minutes, seconds };
+    for (const unit in values) {
+      const strDigits = String(values[unit]).padStart(2,"0").split("");
+      strDigits.forEach((d,i) => {
+        const key = unit+"-"+i;
+        if (lastValues[key] !== d) {
+          const el = document.querySelector(`[data-key="${key}"]`);
+          if (el) {
+            el.classList.add("flip");
+            setTimeout(() => el.classList.remove("flip"), 500);
+            el.querySelector("span").textContent = d;
+          }
+          lastValues[key] = d;
+        }
+      });
+    }
+  }
+  setInterval(renderCountdown, 1000);
+  renderCountdown();
+
+  // Confetti
+  const confettiCanvas = document.getElementById("confetti");
+  const ctx = confettiCanvas.getContext("2d");
+  let confettiPieces = [];
+  function resizeCanvas() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+  function startConfetti() {
+    if (confettiPieces.length > 0) return;
+    let count = window.innerWidth < 640 ? 60 : 120;
+    for (let i = 0; i < count; i++) {
+      confettiPieces.push({
+        x: Math.random() * confettiCanvas.width,
+        y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+        w: Math.random() * 6 + 2,
+        h: Math.random() * 14 + 6,
+        d: Math.random() * 0.5 + 0.5,
+        color: Math.random() > 0.7 ? "#ffffff" : (Math.random() > 0.5 ? "#22c55e" : "#16a34a"),
+        tilt: Math.random() * 20 - 10,
+      });
+    }
+    requestAnimationFrame(updateConfetti);
+  }
+  function updateConfetti() {
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    confettiPieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.tilt * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 12;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.y += p.d * 4;
+      p.x += Math.sin(p.tilt/15);
+      if (p.y > confettiCanvas.height) p.y = -10;
+    });
+    if (confettiPieces.length > 0) requestAnimationFrame(updateConfetti);
+  }
+
+  // Terminal
+  const terminalBtn = document.getElementById("terminalBtn");
+  const terminalOverlay = document.getElementById("terminalOverlay");
+  const terminalOutput = document.getElementById("terminalOutput");
+  const terminalInput = document.getElementById("terminalInput");
+
+  let history = [];
+  let historyIndex = -1;
+
+  terminalBtn.addEventListener("click", () => {
+    terminalBtn.style.display = "none";
+    terminalOverlay.style.display = "flex";
+    showMOTD();
+    terminalInput.focus();
+  });
+
+  function printLine(text, type = "normal") {
+    let styled = text;
+    if (type === "ok") styled = `<span class="text-green-400">[OK]</span> ${text}`;
+    else if (type === "error") styled = `<span class="text-red-400">Error:</span> ${text}`;
+    else if (type === "info") styled = `<span class="text-yellow-400">${text}</span>`;
+    terminalOutput.innerHTML += styled + "\n";
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+  }
+
+  function showMOTD() {
+    terminalOutput.innerHTML = "";
+    printLine("Welcome to Birthday Config Terminal v1.0", "info");
+    printLine("----------------------------------------", "info");
+    const now = new Date();
+    const { nextBirthday } = getTimeParts();
+    printLine(`User: ${settings.name}`);
+    printLine(`Today: ${now.toDateString()}`);
+    printLine(`Next Birthday: ${nextBirthday.toDateString()}`);
+    printLine(`Capsule Messages: ${capsule.length}`);
+    printLine("----------------------------------------", "info");
+    printLine("Type 'help' for available commands.", "info");
+  }
+
+  async function hashText(text) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+
+  function handleCommand(cmd) {
+    const [command, ...args] = cmd.split(" ");
+    switch(command.toLowerCase()) {
+      case "help":
+        printLine("Available commands:", "info");
+        printLine(" set name <Name>                - Set your name");
+        printLine(" set birthday <MM-DD>            - Set your birthday");
+        printLine(" save                     - Save settings");
+        printLine(" info                     - Show user info");
+        printLine(" clear                    - Clear terminal");
+        printLine(" reset all                - Clear ALL saved info");
+        printLine(" exit                     - Close terminal");
+        printLine(" capsule write \"msg\"      - Write a capsule message");
+        printLine(" capsule list             - List capsule messages");
+        printLine(" capsule setpass <pw>         - Set capsule password");
+        printLine(" capsule unlock <pw>          - Unlock capsule");
+        printLine(" capsule open             - Open capsule (on birthday)");
+        printLine(" capsule reset            - Reset capsule data");
+        break;
+
+      case "set":
+        if (args[0] === "name") {
+          settings.name = args.slice(1).join(" ");
+          autoSave();
+          printLine(`Name updated: ${settings.name}`, "ok");
+        } else if (args[0] === "birthday") {
+          const [mm, dd] = args[1].split("-");
+          settings.birthMonth = parseInt(mm, 10) - 1;
+          settings.birthDay = parseInt(dd, 10);
+          autoSave();
+          printLine(`Birthday updated: ${mm}-${dd}`, "ok");
+        } else {
+          printLine("Unknown set command.", "error");
+        }
+        break;
+
+      case "save":
+        saveAll();
+        printLine("Settings saved", "ok");
+        break;
+
+      case "info":
+        const month = String(settings.birthMonth + 1).padStart(2,"0");
+        const day = String(settings.birthDay).padStart(2,"0");
+        let locked = capsule.filter(c => !c.unlocked).length;
+        let unlocked = capsule.filter(c => c.unlocked).length;
+        printLine(`Name: ${settings.name}`);
+        printLine(`Birthday: ${month}-${day}`);
+        printLine(`Capsule Messages: ${capsule.length} (${unlocked} unlocked, ${locked} locked)`);
+        break;
+
+      case "clear":
+        terminalOutput.innerHTML = "";
+        break;
+
+      case "reset":
+        if (args[0] === "all") {
+          localStorage.clear();
+          settings = { name: "Rainier", birthMonth: 5, birthDay: 15 };
+          capsule = [];
+          capsulePassHash = null;
+          printLine("All data has been reset.", "ok");
+        } else {
+          printLine("Usage: reset all", "error");
+        }
+        break;
+
+      case "exit":
+        terminalOverlay.style.display = "none";
+        terminalBtn.style.display = "flex";
+        terminalOutput.innerHTML = "";
+        break;
+
+      case "":
+        break;
+
+      default:
+        printLine(`Unknown command: ${command}. Type 'help' for commands.`, "error");
+    }
+    renderCountdown();
+  }
+
+  function saveAll() {
+    localStorage.setItem("countdownSettings", JSON.stringify(settings));
+    localStorage.setItem("capsuleData", JSON.stringify(capsule));
+    if (capsulePassHash) localStorage.setItem("capsulePassHash", capsulePassHash);
+  }
+  function autoSave() { saveAll(); }
+
+  terminalInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      const cmd = terminalInput.value.trim();
+      if (cmd) {
+        history.unshift(cmd);
+        historyIndex = -1;
+      }
+      printLine(`user@birthday:~$ ${cmd}`);
+      handleCommand(cmd);
+      terminalInput.value = "";
+    }
+    else if (e.key === "ArrowUp") {
+      if (history[historyIndex + 1]) {
+        historyIndex++;
+        terminalInput.value = history[historyIndex];
+      }
+      e.preventDefault();
+    }
+    else if (e.key === "ArrowDown") {
+      if (historyIndex > 0) {
+        historyIndex--;
+        terminalInput.value = history[historyIndex];
+      } else {
+        historyIndex = -1;
+        terminalInput.value = "";
+      }
+      e.preventDefault();
+    }
+  });
+
+  terminalInput.style.caretColor = "#22c55e";
+  </script>
+</body> 
+</html>
