@@ -3,20 +3,20 @@
 <head>   
   <meta charset="UTF-8" />   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />   
-  <title>Birthday Blast 🎉 | Countdown & Time Capsule</title>   
+  <title>Birthday Blast | Countdown & Time Capsule</title>   
 
-  <meta name="description" content="Celebrate your birthday with Birthday Blast! 🎂 Countdown to your special day, unlock a digital time capsule, and enjoy glowing animations." />
+  <meta name="description" content="Celebrate your birthday with Birthday Blast! Countdown to your special day, unlock a digital time capsule, and enjoy glowing animations." />
   <meta name="keywords" content="birthday countdown, birthday website, birthday celebration, digital time capsule, confetti animation" />
   <meta name="author" content="Rainier P.S." />
 
-  <meta property="og:title" content="Birthday Blast 🎉 | Countdown & Time Capsule" />
+  <meta property="og:title" content="Birthday Blast | Countdown & Time Capsule" />
   <meta property="og:description" content="Countdown to your birthday, unlock a secret time capsule, and celebrate in style with confetti animations." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://yourdomain.com/" />
   <meta property="og:image" content="https://yourdomain.com/preview.png" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Birthday Blast 🎉 | Countdown & Time Capsule" />
+  <meta name="twitter:title" content="Birthday Blast | Countdown & Time Capsule" />
   <meta name="twitter:description" content="Make your birthday unforgettable with countdowns, glowing animations, and a digital time capsule." />
   <meta name="twitter:image" content="https://yourdomain.com/preview.png" />
 
@@ -187,6 +187,16 @@
         height: 64px;
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .digit span { 
+        transition: none !important; 
+        transform: none !important; 
+        opacity: 1 !important; 
+      }
+      canvas { display: none; }
+      .pulse { animation: none !important; }
+    }
   </style>
 </head> 
 <body class="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white relative overflow-hidden">   
@@ -199,7 +209,7 @@
     </div>   
   </div>   
   <h1 id="greeting" class="text-3xl sm:text-4xl md:text-5xl font-bold mb-8 text-center greeting-glow pulse"></h1>   
-  <div id="countdown" class="flex gap-8"></div>   
+  <div id="countdown" class="flex gap-8" role="timer" aria-live="polite" aria-label="Countdown to birthday"></div>  
   <script>
   // Default settings
   let settings = {
@@ -344,12 +354,22 @@
     terminalInput.focus();
   });
 
+  terminalBtn.setAttribute("tabindex", "0");
+  terminalBtn.setAttribute("aria-label", "Open terminal");
+  terminalBtn.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") {
+      terminalBtn.click();
+      e.preventDefault();
+    }
+  });
+
   function printLine(text, type = "normal") {
-    let styled = text;
-    if (type === "ok") styled = `<span class="text-green-400">[OK]</span> ${text}`;
-    else if (type === "error") styled = `<span class="text-red-400">Error:</span> ${text}`;
-    else if (type === "info") styled = `<span class="text-yellow-400">${text}</span>`;
-    terminalOutput.innerHTML += styled + "\n";
+    const div = document.createElement("div");
+    div.textContent = text;
+    if (type === "ok") div.classList.add("text-green-400");
+    else if (type === "error") div.classList.add("text-red-400");
+    else if (type === "info") div.classList.add("text-yellow-400");
+    terminalOutput.appendChild(div);
     terminalOutput.scrollTop = terminalOutput.scrollHeight;
   }
 
@@ -377,8 +397,8 @@
     switch(command.toLowerCase()) {
       case "help":
         printLine("Available commands:", "info");
-        printLine(" set name <Name>                - Set your name");
-        printLine(" set birthday <MM-DD>            - Set your birthday");
+        printLine(" set name <Name>          - Set your name");
+        printLine(" set birthday <MM-DD>     - Set your birthday");
         printLine(" save                     - Save settings");
         printLine(" info                     - Show user info");
         printLine(" clear                    - Clear terminal");
@@ -386,8 +406,8 @@
         printLine(" exit                     - Close terminal");
         printLine(" capsule write \"msg\"      - Write a capsule message");
         printLine(" capsule list             - List capsule messages");
-        printLine(" capsule setpass <pw>         - Set capsule password");
-        printLine(" capsule unlock <pw>          - Unlock capsule");
+        printLine(" capsule setpass <pw>     - Set capsule password");
+        printLine(" capsule unlock <pw>      - Unlock capsule");
         printLine(" capsule open             - Open capsule (on birthday)");
         printLine(" capsule reset            - Reset capsule data");
         break;
